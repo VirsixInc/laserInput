@@ -1,0 +1,74 @@
+<controls>
+    <SliderInt_Min_Bri>
+        <name>Min Bri</name>
+        <value>1</value>
+    </SliderInt_Min_Bri>
+    <SliderInt_Max_Bri>
+        <name>Max Bri</name>
+        <value>255</value>
+    </SliderInt_Max_Bri>
+    <SliderInt_Min_Sat>
+        <name>Min Sat</name>
+        <value>0</value>
+    </SliderInt_Min_Sat>
+    <SliderInt_Max_Sat>
+        <name>Max Sat</name>
+        <value>255</value>
+    </SliderInt_Max_Sat>
+    <SliderInt_Min_Hue>
+        <name>Min Hue</name>
+        <value>0</value>
+    </SliderInt_Min_Hue>
+    <SliderInt_Max_Hue>
+        <name>Max Hue</name>
+        <value>255</value>
+    </SliderInt_Max_Hue>
+    <SliderFloat_Gain>
+        <name>Gain</name>
+        <value>0.000000000</value>
+    </SliderFloat_Gain>
+    <SliderFloat_Shutter>
+        <name>Shutter</name>
+        <value>1.000000000</value>
+    </SliderFloat_Shutter>
+    <SliderFloat_Gamma>
+        <name>Gamma</name>
+        <value>0.995000005</value>
+    </SliderFloat_Gamma>
+    <SliderFloat_Brightness>
+        <name>Brightness</name>
+        <value>0.144999996</value>
+    </SliderFloat_Brightness>
+    <SliderFloat_Contrast>
+        <name>Contrast</name>
+        <value>1.000000000</value>
+    </SliderFloat_Contrast>
+    <SliderFloat_Hue>
+        <name>Hue</name>
+        <value>0.000000000</value>
+    </SliderFloat_Hue>
+    <SliderFloat_Flicker>
+        <name>Flicker</name>
+        <value>1.000000000</value>
+    </SliderFloat_Flicker>
+    <SliderInt_minContArea>
+        <name>minContArea</name>
+        <value>0</value>
+    </SliderInt_minContArea>
+    <SliderInt_maxContArea>
+        <name>maxContArea</name>
+        <value>12400</value>
+    </SliderInt_maxContArea>
+    <Toggle_Configured>
+        <name>Configured</name>
+        <value>1</value>
+    </Toggle_Configured>
+    <Toggle_Save_Points>
+        <name>Save Points</name>
+        <value>0</value>
+    </Toggle_Save_Points>
+    <Toggle_Reset_Pts>
+        <name>Reset Pts</name>
+        <value>0</value>
+    </Toggle_Reset_Pts>
+</controls>
