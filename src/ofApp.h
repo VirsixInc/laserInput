@@ -7,6 +7,7 @@
 #include "ofxOpenCv.h"
 #include "ofxXmlSettings.h"
 #include "ofxSimpleGuiToo.h"
+#include "BallTracker.h"
 
 using namespace cv;
 
@@ -23,27 +24,46 @@ class ofApp : public ofBaseApp{
 		void mousePressed(int x, int y, int button);
 		void mouseReleased(int x, int y, int button);
 
-    ofxCvColorImage iterateImg, warpImg, diffImg;
-    ofxCvColorImage transImg;
-    ofxCvGrayscaleImage filtered;
-    ofxCvContourFinder contours;
+	private:
+		void SendMessage(string message);
+		void SendHitMessage(string message, ofPoint pos);
+		void SaveCorners();
 
-    ofxMacamPs3Eye ps3Eye;
+		void CheckOSCMessage();
 
-    float gain, shutter, gamma, brightness, contrast, hue, flicker;
+		ofxCvColorImage iterateImg, warpImg, diffImg;
+		ofxCvColorImage transImg;
+		ofxCvGrayscaleImage filtered;
+		ofxCvContourFinder contours;
 
-    unsigned char * videoMirror;
-    int camWidth, camHeight, range;
-    int minContArea, maxContArea;
-    int minBriFind, maxBriFind, minSatFind, maxSatFind, minHueFind, maxHueFind;
-    int valRange, satRange, hueRange;
+		ofxMacamPs3Eye ps3Eye;
 
-    bool drawCams, configured, savePts, saveBk, resetPts;
+		float gain, shutter, gamma, brightness, contrast, hue, flicker;
 
-    ofPoint dest[4];
-    ofPoint src[4];
-    int selectedCorner;
+		unsigned char * videoMirror;
+		int camWidth, camHeight, range;
+		int minContArea, maxContArea;
+		int minBriFind, maxBriFind, minSatFind, maxSatFind, minHueFind, maxHueFind;
+		int valRange, satRange, hueRange;
 
-    ofxSimpleGuiToo gui;
-    ofxOscSender sender;
+		bool drawCams, configured, saveCorners, saveBk/*, resetPts*/;
+
+		ofPoint dest[4];
+		ofPoint src[4];
+		int selectedCorner;
+
+		ofxSimpleGuiToo gui;
+		ofxOscSender sender;
+
+		bool flip;
+
+
+		// BallTracker stuff
+		BallTracker ballTracker;
+		vector<ofRectangle> rects;
+		vector<unsigned int> labels;
+		int minVariationDistance, lifeTime;
+
+		//AutoConfigurator stuff
+		AutoConfigurator autoConfigurator;
 };

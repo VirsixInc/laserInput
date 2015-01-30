@@ -24,10 +24,12 @@ void ofApp::setup(){
   gui.addSlider("Flicker", flicker, 1, 2);
   gui.addSlider("minContArea", minContArea, 0, 2000);
   gui.addSlider("maxContArea", maxContArea, 0, 20000);
-  gui.addToggle("Configured",configured);
-  gui.addToggle("Save Points",savePts);
-  gui.addToggle("Reset Pts",resetPts);
-
+  gui.addSlider("minVariationDistance", minVariationDistance, 0.01, 500.0);
+  gui.addSlider("lifeTime", lifeTime, 0, 80);
+  gui.addToggle("Configured", configured);
+  gui.addToggle("Save Points", saveCorners);
+  //gui.addToggle("Reset Pts", resetPts);
+  gui.addToggle("Flip", flip);
   gui.loadFromXML();
   gui.show();
 
@@ -51,112 +53,112 @@ void ofApp::setup(){
   dest[1] = ofPoint(camWidth,0);
   dest[2] = ofPoint(0,camHeight);
   dest[3] = ofPoint(camWidth,camHeight);
+
+  ballTracker.init(&lifeTime, &minVariationDistance, &minContArea, &maxContArea);
+
+  autoConfigurator.init(dest, camWidth, camHeight);
 }
 
 //--------------------------------------------------------------
 void ofApp::update(){
-  if(!ps3Eye.getAutoGainAndShutter()){
-    ps3Eye.setGain(gain);
-    ps3Eye.setShutter(shutter);
-  }else{
-    ofLogWarning("Auto gain and shutter is true!!! SETTING FALSE");
-    ps3Eye.setAutoGainAndShutter(false);
-  }
-	ps3Eye.setGamma(gamma);
-	ps3Eye.setBrightness(brightness);
-	ps3Eye.setContrast(contrast);
-	ps3Eye.setHue(hue);
-	ps3Eye.setFlicker(flicker);
-  ps3Eye.update();
+	if (!autoConfigurator.configured()) {
+		unsigned char* pixels = ps3Eye.getPixels();
+		warpImg.setFromPixels(pixels, camWidth, camHeight);
+		warpImg.resize(camWidth, camHeight);
 
-  if(ps3Eye.isFrameNew()){
-    if(configured){
-      unsigned char* pixels = ps3Eye.getPixels();
-      warpImg.setFromPixels(pixels, camWidth, camHeight);
-      warpImg.resize(camWidth, camHeight);
-      iterateImg.warpIntoMe(warpImg, dest, src);
-      iterateImg.convertRgbToHsv();
-      filtered.setFromPixels(pixels,camWidth, camHeight);
-      /*
-      if(saveBk){
-        saveBk = false;
-        diffImg.setFromPixels(iterateImg.getPixels(), camWidth, camHeight);
-      }
+		autoConfigurator.configure(warpImg);
 
-      */
-      ofPixels H = iterateImg.getPixelsRef().getChannel(0);
-      ofPixels S = iterateImg.getPixelsRef().getChannel(1);
-      ofPixels B = iterateImg.getPixelsRef().getChannel(2);
-      for(int i=0; i<iterateImg.getWidth()*iterateImg.getHeight(); i++){
-        if(ofInRange(H.getPixels()[i], minHueFind, maxHueFind) &&
-          ofInRange(S.getPixels()[i], minSatFind, maxSatFind) &&
-          ofInRange(B.getPixels()[i], minBriFind, maxBriFind)){
-          filtered.getPixels()[i] = 255;
-        }else{
-          filtered.getPixels()[i] = 0;
-        }
-      }
-      contours.findContours(filtered, minContArea, maxContArea, 8, true);
-      for(int i = 0;i<contours.nBlobs;i++){
-        ofxCvBlob blob = contours.blobs.at(i);
-        ofxOscMessage m;
-        m.setAddress("/move");
-        float x = blob.centroid.x/camWidth;
-        float y = blob.centroid.y/camHeight;
-        m.addFloatArg(x);
-        m.addFloatArg(y);
-        ofLogNotice(ofToString(x) + "   " + ofToString(y));
-        sender.sendMessage(m);
-      }
-    }
-  }
-  if(resetPts){
-    resetPts = false;
-    ofxXmlSettings settings;
-    settings.addTag("positions");
-    settings.pushTag("positions");
-    for(int i = 0;i<4;i++){
-      if(dest[i].x != -1 && dest[i].y != -1){
-        settings.addTag("position");
-        settings.pushTag("position", i);
-        settings.setValue("X", i*10);
-        settings.setValue("Y", i*10);
-        settings.popTag();
-      }
-    }
-  }
-  if(savePts){
-    savePts = false;
-    ofxXmlSettings settings;
-    settings.addTag("positions");
-    settings.pushTag("positions");
-    for(int i = 0;i<4;i++){
-      if(dest[i].x != -1 && dest[i].y != -1){
-        settings.addTag("position");
-        settings.pushTag("position", i);
-        settings.setValue("X", dest[i].x);
-        settings.setValue("Y", dest[i].y);
-        settings.popTag();
-      }
-    }
-    settings.popTag();
-    settings.saveFile("points.xml");
-  }
+		if (autoConfigurator.configured()) { // Config done
+			SendMessage("/config/done");
+			SaveCorners();
+			dest = autoConfigurator.getCorners();
+		}
+	} else {
+		if (!ps3Eye.getAutoGainAndShutter()) {
+			ps3Eye.setGain(gain);
+			ps3Eye.setShutter(shutter);
+		}
+		else {
+			ofLogWarning("Auto gain and shutter is true!!! SETTING FALSE");
+			ps3Eye.setAutoGainAndShutter(false);
+		}
+		ps3Eye.setGamma(gamma);
+		ps3Eye.setBrightness(brightness);
+		ps3Eye.setContrast(contrast);
+		ps3Eye.setHue(hue);
+		ps3Eye.setFlicker(flicker);
+		ps3Eye.update();
+
+		if (ps3Eye.isFrameNew()){
+			if (configured) {
+				unsigned char* pixels = ps3Eye.getPixels();
+				warpImg.setFromPixels(pixels, camWidth, camHeight);
+				warpImg.resize(camWidth, camHeight);
+				iterateImg.warpIntoMe(warpImg, dest, src);
+				iterateImg.convertRgbToHsv();
+				filtered.setFromPixels(pixels, camWidth, camHeight);
+
+				ofPixels H = iterateImg.getPixelsRef().getChannel(0);
+				ofPixels S = iterateImg.getPixelsRef().getChannel(1);
+				ofPixels B = iterateImg.getPixelsRef().getChannel(2);
+				for (int i = 0; i < iterateImg.getWidth()*iterateImg.getHeight(); i++){
+					if (ofInRange(H.getPixels()[i], minHueFind, maxHueFind) &&
+						ofInRange(S.getPixels()[i], minSatFind, maxSatFind) &&
+						ofInRange(B.getPixels()[i], minBriFind, maxBriFind)){
+						filtered.getPixels()[i] = 255;
+					}
+					else{
+						filtered.getPixels()[i] = 0;
+					}
+				}
+
+				labels.clear();
+				rects.clear();
+				ballTracker.track(filtered, &rects, &labels);
+
+				for (int i = 0; i < labels.size(); i++) {
+					if (!ballTracker.depthTracked(labels[i])) {
+						SendHitMessage("/move", rects[i].getCenter());
+					}
+				}
+			}
+		}
+
+		/*if (resetPts) {
+			resetPts = false;
+			ofxXmlSettings settings;
+			settings.addTag("positions");
+			settings.pushTag("positions");
+			for (int i = 0; i < 4; i++){
+				if (dest[i].x != -1 && dest[i].y != -1){
+					settings.addTag("position");
+					settings.pushTag("position", i);
+					settings.setValue("X", i * 10);
+					settings.setValue("Y", i * 10);
+					settings.popTag();
+				}
+			}
+		}*/
+
+		if (saveCorners) {
+			saveCorners = false;
+			SaveCorners();
+		}
+	}
 }
 
 //--------------------------------------------------------------
 void ofApp::draw(){
   ofSetColor(255,255,255);
 
-	for (int j = 0; j < 4; j++){
-		ofCircle(dest[j].x, dest[j].y, 3);
-	}
+  for (int j = 0; j < 4; j++){
+	ofCircle(dest[j].x, dest[j].y, 3);
+  }
   filtered.draw(0,camHeight);
   iterateImg.draw(camWidth,0);
   if(configured){
     contours.draw(0,0);
-
-  }else{
+  } else {
     ps3Eye.draw(0,0);
     ofxXmlSettings settings;
     for(int j=0; j<4;j++){
@@ -193,6 +195,56 @@ void ofApp::draw(){
   gui.draw();
 }
 
+//--------------------------------------------------------------
+void testApp::CheckOSCMessage() {
+	while (receiver.hasWaitingMessages()){
+		// get the next message
+		ofxOscMessage m;
+		if (receiver.getNextMessage(&m)) {
+			string addr = m.getAddress();
+			if (addr == "/configure") {
+				autoConfigurator.reconfigure();
+			}
+		}
+	}
+}
+
+//--------------------------------------------------------------
+void testApp::SendMessage(string message) {
+	ofxOscMessage m;
+	m.setAddress(message);
+	sender.sendMessage(m);
+}
+
+//--------------------------------------------------------------
+void testApp::SendHitMessage(string message, ofPoint pos, int player) {
+	ofxOscMessage m;
+	m.setAddress(message);
+	float x = pos.x / camWidth;
+	float y = pos.y / camHeight;
+	if (flip) {
+		x = 1 - x;
+		y = 1 - y;
+	}
+	m.addFloatArg(x);
+	m.addFloatArg(y);
+	sender.sendMessage(m);
+}
+
+void testApp::SaveCorners() {
+	ofxXmlSettings settings;
+	settings.addTag("positions");
+	settings.pushTag("positions");
+	for (int i = 0; i < 4; i++){
+		settings.addTag("position");
+		settings.pushTag("position", i);
+		settings.setValue("X", dest[i].x);
+		settings.setValue("Y", dest[i].y);
+		settings.popTag();
+	}
+	settings.popTag();
+	settings.saveFile("points.xml");
+}
 
 //--------------------------------------------------------------
 void ofApp::keyPressed(int key){
