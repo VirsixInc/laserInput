@@ -8,6 +8,7 @@
 #include "ofxXmlSettings.h"
 #include "ofxSimpleGuiToo.h"
 #include "BallTracker.h"
+#include "AutoConfigurator.h"
 
 using namespace cv;
 
@@ -40,7 +41,7 @@ class ofApp : public ofBaseApp{
 
 		float gain, shutter, gamma, brightness, contrast, hue, flicker;
 
-		unsigned char * videoMirror;
+		unsigned char* videoMirror;
 		int camWidth, camHeight, range;
 		int minContArea, maxContArea;
 		int minBriFind, maxBriFind, minSatFind, maxSatFind, minHueFind, maxHueFind;
@@ -53,7 +54,9 @@ class ofApp : public ofBaseApp{
 		int selectedCorner;
 
 		ofxSimpleGuiToo gui;
+    
 		ofxOscSender sender;
+        ofxOscReceiver receiver;
 
 		bool flip;
 
@@ -62,7 +65,8 @@ class ofApp : public ofBaseApp{
 		BallTracker ballTracker;
 		vector<ofRectangle> rects;
 		vector<unsigned int> labels;
-		int minVariationDistance, lifeTime;
+        float minVariationDistance;
+        int lifeTime;
 
 		//AutoConfigurator stuff
 		AutoConfigurator autoConfigurator;

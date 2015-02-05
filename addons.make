@@ -1,6 +1,7 @@
-ofxOsc
 ofxOpenCv
+ofxOsc
 ofxXmlSettings
+ofxCv
 ofxMacamPs3Eye
 ofxMSAInteractiveObject
 ofxSimpleGuiToo

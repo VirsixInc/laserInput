@@ -4,6 +4,7 @@
 #include "ofMain.h"
 #include "ofxOpenCv.h"
 #include "ofxCv.h"
+#include "corners.h"
 
 const int FRONT_END_DELAY_TIME = 20;
 
@@ -14,7 +15,7 @@ public:
 	}
 	~AutoConfigurator() { }
 
-	void Init(/*ofPoint p_corners[4],*/ int p_camWidth, int p_camHeight) {
+	void init(/*ofPoint p_corners[4],*/ int p_camWidth, int p_camHeight) {
 		//corners = p_corners;
 		camWidth = p_camWidth;
 		camHeight = p_camHeight;
@@ -26,8 +27,11 @@ public:
 		configured = false;
 	}
 
-	void configure(ofxCvColorImage image) {
+    void configure(cv::Mat image) {
 		timer++;
+
+        cv::Mat copyMat = image;
+        
 		if (timer > FRONT_END_DELAY_TIME) {
 			timer = 0;
 
@@ -40,7 +44,8 @@ public:
 			contourFinder.setMinArea(100); // TODO tweak. Seems good tho.
 			contourFinder.setThreshold(100); // TODO tweak. Seems good tho.
 			contourFinder.resetMaxArea();
-			contourFinder.findContours(image);
+            
+            contourFinder.findContours(copyMat);
 
 			//TODO cant just give up like this.
 			if (contourFinder.size() < 1) {
@@ -52,27 +57,32 @@ public:
 				return;
 			}
 				
-			const std::vector<ofPoint> contPts = colorContourFinder.getPolyline(0).getVertices();
+			const std::vector<ofPoint> contPts = contourFinder.getPolyline(0).getVertices();
 			get_corners(contPts, &contCorners);
 
-			dest[0] = contCorners.tl;
-			dest[1] = contCorners.tr;
-			dest[2] = contCorners.br;
-			dest[3] = contCorners.bl;
+			corners[0] = contCorners.tl;
+			corners[1] = contCorners.tr;
+			corners[2] = contCorners.br;
+			corners[3] = contCorners.bl;
 
 			configured = true;
 		}
 	}
 
-	bool configured() {
+	bool isConfigured() {
 		return configured;
 	}
 
-	ofPoint* getCorners() {
-		return corners;
+	void getCorners(ofPoint* dest) {
+        dest[0] = corners[0];
+        dest[1] = corners[1];
+        dest[2] = corners[2];
+        dest[3] = corners[3];
 	}
 
 private:
+    Corners contCorners;
+    
 	bool configured;
 	ofPoint corners[4];
 

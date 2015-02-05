@@ -19,6 +19,7 @@ set LOGINFO to 0 if you dont want logs
 #include "ofMain.h"
 #include "ofxOpenCv.h"
 #include "ofxCv.h"
+//#include "ofxCv.h"
 
 class BallTracker {
 public:
@@ -102,7 +103,7 @@ public:
 			int label = contourFinder.getLabel(i);
 			ofVec2f pos = ofxCv::toOf(tracker.getCurrent(label)).getCenter();
 			//ofVec2f vel = velocityMap[label];
-			ofLine(pos, pos + (vel * 10));
+//			ofLine(pos, pos + (vel * 10));
 		}
 	}
 

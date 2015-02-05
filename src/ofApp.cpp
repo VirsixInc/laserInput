@@ -3,6 +3,7 @@
 //--------------------------------------------------------------
 void ofApp::setup(){
   sender.setup("localhost", 9999);
+    receiver.setup(7600);
 
   camWidth = 640;
   camHeight = 480;
@@ -37,7 +38,7 @@ void ofApp::setup(){
   ps3Eye.listDevices();
   ps3Eye.setDesiredFrameRate(60);
   ps3Eye.setWhiteBalance(4);
-  ps3Eye.initGrabber(640, 480);
+  ps3Eye.initGrabber(camWidth, camHeight, false);
   warpImg.allocate(camWidth, camHeight);
 
   iterateImg.allocate(camWidth, camHeight);
@@ -56,23 +57,39 @@ void ofApp::setup(){
 
   ballTracker.init(&lifeTime, &minVariationDistance, &minContArea, &maxContArea);
 
-  autoConfigurator.init(dest, camWidth, camHeight);
+  autoConfigurator.init(camWidth, camHeight);
 }
 
 //--------------------------------------------------------------
 void ofApp::update(){
-	if (!autoConfigurator.configured()) {
-		unsigned char* pixels = ps3Eye.getPixels();
-		warpImg.setFromPixels(pixels, camWidth, camHeight);
-		warpImg.resize(camWidth, camHeight);
+	if (!autoConfigurator.isConfigured()) {
+        if (!ps3Eye.getAutoGainAndShutter()) {
+            ps3Eye.setGain(gain);
+            ps3Eye.setShutter(shutter);
+        }
+        else {
+            ofLogWarning("Auto gain and shutter is true!!! SETTING FALSE");
+            ps3Eye.setAutoGainAndShutter(false);
+        }
+        ps3Eye.setGamma(gamma);
+        ps3Eye.setBrightness(brightness);
+        ps3Eye.setContrast(contrast);
+        ps3Eye.setHue(hue);
+        ps3Eye.setFlicker(flicker);
+        ps3Eye.update();
+        if (ps3Eye.isFrameNew()) {
+            unsigned char* pixels = ps3Eye.getPixels();
+            warpImg.setFromPixels(pixels, camWidth, camHeight);
+            warpImg.resize(camWidth, camHeight);
+            
+            autoConfigurator.configure(ofxCv::toCv(warpImg));
 
-		autoConfigurator.configure(warpImg);
-
-		if (autoConfigurator.configured()) { // Config done
-			SendMessage("/config/done");
-			SaveCorners();
-			dest = autoConfigurator.getCorners();
-		}
+            if (autoConfigurator.isConfigured()) { // Config done
+                SendMessage("/config/done");
+                SaveCorners();
+                autoConfigurator.getCorners(dest);
+            }
+        }
 	} else {
 		if (!ps3Eye.getAutoGainAndShutter()) {
 			ps3Eye.setGain(gain);
@@ -114,6 +131,7 @@ void ofApp::update(){
 
 				labels.clear();
 				rects.clear();
+//                contours.findContours(filtered, minContArea, maxContArea, 8, true);
 				ballTracker.track(filtered, &rects, &labels);
 
 				for (int i = 0; i < labels.size(); i++) {
@@ -196,7 +214,7 @@ void ofApp::draw(){
 }
 
 //--------------------------------------------------------------
-void testApp::CheckOSCMessage() {
+void ofApp::CheckOSCMessage() {
 	while (receiver.hasWaitingMessages()){
 		// get the next message
 		ofxOscMessage m;
@@ -210,14 +228,14 @@ void testApp::CheckOSCMessage() {
 }
 
 //--------------------------------------------------------------
-void testApp::SendMessage(string message) {
+void ofApp::SendMessage(string message) {
 	ofxOscMessage m;
 	m.setAddress(message);
 	sender.sendMessage(m);
 }
 
 //--------------------------------------------------------------
-void testApp::SendHitMessage(string message, ofPoint pos, int player) {
+void ofApp::SendHitMessage(string message, ofPoint pos) {
 	ofxOscMessage m;
 	m.setAddress(message);
 	float x = pos.x / camWidth;
@@ -231,7 +249,7 @@ void testApp::SendHitMessage(string message, ofPoint pos, int player) {
 	sender.sendMessage(m);
 }
 
-void testApp::SaveCorners() {
+void ofApp::SaveCorners() {
 	ofxXmlSettings settings;
 	settings.addTag("positions");
 	settings.pushTag("positions");

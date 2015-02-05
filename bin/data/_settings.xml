@@ -1,64 +1,72 @@
 <controls>
     <SliderInt_Min_Bri>
         <name>Min Bri</name>
-        <value>1</value>
+        <value>11</value>
     </SliderInt_Min_Bri>
     <SliderInt_Max_Bri>
         <name>Max Bri</name>
-        <value>255</value>
+        <value>196</value>
     </SliderInt_Max_Bri>
     <SliderInt_Min_Sat>
         <name>Min Sat</name>
-        <value>0</value>
+        <value>39</value>
     </SliderInt_Min_Sat>
     <SliderInt_Max_Sat>
         <name>Max Sat</name>
-        <value>255</value>
+        <value>210</value>
     </SliderInt_Max_Sat>
     <SliderInt_Min_Hue>
         <name>Min Hue</name>
-        <value>0</value>
+        <value>40</value>
     </SliderInt_Min_Hue>
     <SliderInt_Max_Hue>
         <name>Max Hue</name>
-        <value>255</value>
+        <value>209</value>
     </SliderInt_Max_Hue>
     <SliderFloat_Gain>
         <name>Gain</name>
-        <value>0.000000000</value>
+        <value>0.644999981</value>
     </SliderFloat_Gain>
     <SliderFloat_Shutter>
         <name>Shutter</name>
-        <value>1.000000000</value>
+        <value>0.745000005</value>
     </SliderFloat_Shutter>
     <SliderFloat_Gamma>
         <name>Gamma</name>
-        <value>0.995000005</value>
+        <value>0.135000005</value>
     </SliderFloat_Gamma>
     <SliderFloat_Brightness>
         <name>Brightness</name>
-        <value>0.144999996</value>
+        <value>0.514999986</value>
     </SliderFloat_Brightness>
     <SliderFloat_Contrast>
         <name>Contrast</name>
-        <value>1.000000000</value>
+        <value>0.555000007</value>
     </SliderFloat_Contrast>
     <SliderFloat_Hue>
         <name>Hue</name>
-        <value>0.000000000</value>
+        <value>0.540000021</value>
     </SliderFloat_Hue>
     <SliderFloat_Flicker>
         <name>Flicker</name>
-        <value>1.000000000</value>
+        <value>1.470000029</value>
     </SliderFloat_Flicker>
     <SliderInt_minContArea>
         <name>minContArea</name>
-        <value>0</value>
+        <value>40</value>
     </SliderInt_minContArea>
     <SliderInt_maxContArea>
         <name>maxContArea</name>
-        <value>12400</value>
+        <value>2000</value>
     </SliderInt_maxContArea>
+    <SliderFloat_minVariationDistance>
+        <name>minVariationDistance</name>
+        <value>47.509048462</value>
+    </SliderFloat_minVariationDistance>
+    <SliderInt_lifeTime>
+        <name>lifeTime</name>
+        <value>4</value>
+    </SliderInt_lifeTime>
     <Toggle_Configured>
         <name>Configured</name>
         <value>1</value>
@@ -67,8 +75,8 @@
         <name>Save Points</name>
         <value>0</value>
     </Toggle_Save_Points>
-    <Toggle_Reset_Pts>
-        <name>Reset Pts</name>
+    <Toggle_Flip>
+        <name>Flip</name>
         <value>0</value>
-    </Toggle_Reset_Pts>
+    </Toggle_Flip>
 </controls>
